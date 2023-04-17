@@ -5,12 +5,16 @@ import PlanetRepository from "../../src/application/repository/PlanetRepository"
 import InvalidFlyCardNumberError from "../../src/application/exceptions/InvalidFlyCardNumberError";
 import AviatorAlreadyExistsError from "../../src/application/exceptions/AviatorAlreadyExistsError";
 import PlanetNotFoundError from "../../src/application/exceptions/PlanetNotFoundError";
+import Planet from "../../src/domain/entity/Planet";
+import Aviator from "../../src/domain/entity/aviator/Aviator";
 
+jest.mock("../../src/application/repository/AviatorRepository");
+jest.mock("../../src/application/repository/PlanetRepository");
 
 describe('SaveAvitor', () => {
     let saveAviator: SaveAviator;
-    let mockAviatorRepository: AviatorRepository;
-    let mockPlanetRepository: PlanetRepository
+    let mockAviatorRepository: jest.Mocked<AviatorRepository>;
+    let mockPlanetRepository: jest.Mocked<PlanetRepository>
 
     beforeEach(() => {
         mockAviatorRepository = {
@@ -18,10 +22,10 @@ describe('SaveAvitor', () => {
             save: jest.fn(),
             findById: jest.fn(),
             updatePlanet: jest.fn()
-        };
+        } as jest.Mocked<AviatorRepository>;
         mockPlanetRepository = {
             getByName: jest.fn()
-        };
+        } as jest.Mocked<PlanetRepository>;
         saveAviator = new SaveAviator(mockAviatorRepository, mockPlanetRepository);
     });
 
@@ -32,8 +36,9 @@ describe('SaveAvitor', () => {
     };
 
     test("Deve salvar o pito", async () => {
-        (mockAviatorRepository.findByFlyCardNumber as jest.Mock).mockResolvedValueOnce(null);
-        (mockPlanetRepository.getByName as jest.Mock).mockResolvedValueOnce({ getId: () => 1 });
+        const planet = new Planet(1, 'PlanetName')
+        mockAviatorRepository.findByFlyCardNumber.mockResolvedValueOnce(null);
+        mockPlanetRepository.getByName.mockResolvedValueOnce(planet);
 
         await expect(saveAviator.execute(aviatorData)).resolves.toBeUndefined();
         expect(mockAviatorRepository.findByFlyCardNumber).toHaveBeenCalledWith(
@@ -54,7 +59,7 @@ describe('SaveAvitor', () => {
             flyCardNumber: invalidFlyCardNumber,
         };
 
-        (mockAviatorRepository.findByFlyCardNumber as jest.Mock).mockResolvedValueOnce(null);
+        mockAviatorRepository.findByFlyCardNumber.mockResolvedValueOnce(null);
 
         await expect(
             saveAviator.execute(aviatorDataWithInvalidFlyCardNumber)
@@ -62,9 +67,8 @@ describe('SaveAvitor', () => {
     });
 
     test('Deve receber o erro AviatorAlreadyExistsError se o piloto ja existir', async () => {
-        (mockAviatorRepository.findByFlyCardNumber as jest.Mock).mockResolvedValueOnce({
-            flyCardNumber: aviatorData.flyCardNumber,
-        });
+        const aviator = new Aviator(1, 'luiz', 2, 1, 'planet');
+        mockAviatorRepository.findByFlyCardNumber.mockResolvedValueOnce(aviator);
 
         await expect(saveAviator.execute(aviatorData)).rejects.toThrow(
             new AviatorAlreadyExistsError(aviatorData.flyCardNumber)
@@ -72,7 +76,7 @@ describe('SaveAvitor', () => {
     });
 
     test('Deve receber o erro PlanetNotFoundError se o planeta não existir', async () => {
-        (mockPlanetRepository.getByName as jest.Mock).mockResolvedValueOnce(null);
+        mockPlanetRepository.getByName.mockResolvedValueOnce(null);
 
         await expect(saveAviator.execute(aviatorData)).rejects.toThrow(
           new PlanetNotFoundError(aviatorData.currentPlanet)
