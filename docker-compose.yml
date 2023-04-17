@@ -1,0 +1,16 @@
+# For more information: https://laravel.com/docs/sail
+version: '3'
+services:
+    pgsql:
+        container_name: 'db-test-will'
+        image: 'postgres:14'
+        ports:
+            - '5432:5432'
+        environment:
+            - POSTGRES_USER=pgsql
+            - POSTGRES_PASSWORD=pgsql
+            - POSTGRES_DB=will_db
+        volumes:
+            - 'pgsql:/var/lib/postgresql/data'
+volumes:
+    pgsql:

@@ -1,0 +1,18 @@
+{
+    "test": {
+      "driver": "sqlite3",
+      "filename": "test/database.sqlite"
+    },
+    "dev": {
+      "driver": "pg",
+      "user": "pgsql",
+      "password": "pgsql",
+      "host": "localhost",
+      "database": "will_db",
+      "schema": "public",
+      "ssl": false,
+      "multipleStatements": true,
+      "connectionTimeoutMillis": 5000,
+      "idleTimeoutMillis": 30000
+    }
+  }
