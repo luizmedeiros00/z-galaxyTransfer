@@ -22,7 +22,7 @@ export default class Flight {
     }
 
     getArrivalAt(): Date {
-        return new Date(this.arrivalAt)
+        return this.arrivalAt
     }
 
     getDestinationPlanet(): string {

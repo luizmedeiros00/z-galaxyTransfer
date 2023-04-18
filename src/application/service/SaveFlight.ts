@@ -26,23 +26,10 @@ export default class SaveFlight {
         if (!FlightValidator.validateDates(flightData)) {
             throw new InvalidDataFlightError()
         }
-        
+
         const airship = await this.airshipRepository.findById(flightData.airshipId)
         if (!airship) {
             throw new AirshipNotFoundError(flightData.airshipId);
-        }
-        
-        const lastFlight = await this.flightRepository.getLastFlightByAirship(flightData.airshipId)
-        if (lastFlight) {
-            const finished = lastFlight.finished(flightData.startAt)
-            if (!finished) {
-                throw new LastFlightNotCompletedError()
-            }
-
-            const toFuel = airship.toFuel(lastFlight.getArrivalAt(), flightData.startAt)
-            if(toFuel) {
-                await this.airshipRepository.updateCurrentCapacity(airship.id, airship.getFuelCapacity())
-            }
         }
 
         const aviator = await this.aviatorRepository.findById(airship.aviatorId)
@@ -60,11 +47,22 @@ export default class SaveFlight {
             throw new RouteNotFoundError();
         }
 
-        if (route.getExpense() > airship.getCurrentCapacity()) {
+        const lastFlight = await this.flightRepository.getLastFlightByAirship(flightData.airshipId)
+        if (lastFlight && !lastFlight.finished(flightData.startAt)) {
+            throw new LastFlightNotCompletedError()
+        }
+
+        let currentCapacity = airship.getCurrentCapacity()
+        const needToFuel = lastFlight && currentCapacity === 0 && FlightValidator.isTomorrow(lastFlight.getArrivalAt(), flightData.startAt)
+        if (needToFuel) {
+            currentCapacity = airship.getFuelCapacity()
+        }
+
+        if (route.getExpense() > currentCapacity) {
             throw new InsufficientFuelError();
         }
 
-        const finalCapacity = airship.getCurrentCapacity() - route.getExpense()
+        const finalCapacity = currentCapacity - route.getExpense()
 
         const newFlightData = {
             startAt: flightData.startAt,
@@ -72,7 +70,7 @@ export default class SaveFlight {
             originPlanetId: aviator.gePlanetId(),
             destinationPlanetId: destinationPlanet.getId(),
             airshipId: airship.getId(),
-            initialCapacity: airship.getCurrentCapacity(),
+            initialCapacity: currentCapacity,
             finalCapacity: finalCapacity,
         }
 
