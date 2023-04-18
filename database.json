@@ -1,7 +1,7 @@
 {
     "test": {
       "driver": "sqlite3",
-      "filename": "test/database.sqlite"
+      "filename": ":memory:"
     },
     "dev": {
       "driver": "pg",

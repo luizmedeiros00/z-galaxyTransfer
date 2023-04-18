@@ -12,5 +12,17 @@ services:
             - POSTGRES_DB=will_db
         volumes:
             - 'pgsql:/var/lib/postgresql/data'
+    db_test:
+        container_name: 'db-test'
+        image: 'postgres:14'
+        ports:
+            - '5432:5432'
+        environment:
+            - POSTGRES_USER=test
+            - POSTGRES_PASSWORD=test
+            - POSTGRES_DB=will_db_test
+        volumes:
+            - 'pgsql_test:/var/lib/postgresql/data'
 volumes:
     pgsql:
+    pgsql_test:

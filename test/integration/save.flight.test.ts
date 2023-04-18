@@ -100,7 +100,6 @@ describe("SaveFlight", () => {
     test("Deve lançar o erro AviatorNotFoundError quando o piloto nao for encontrado", async () => {
         const airshipMock = new Airship(1, 'model', 2023, 100, 100, 1)
         mockAirshipRepository.findById.mockResolvedValue(airshipMock);
-        // mockFlightRepository.getLastFlightByAirship.mockResolvedValue(null)
         const findAviator = mockAviatorRepository.findById.mockResolvedValue(null)
         await expect(saveFlight.execute(flightData)).rejects.toThrow(AviatorNotFoundError)
         expect(findAviator).toHaveBeenCalledWith(airshipMock.getId())
@@ -111,7 +110,6 @@ describe("SaveFlight", () => {
         const aviatorMock = new Aviator(1, "John Doe", 123456, 1, "Earth");
 
         mockAirshipRepository.findById.mockResolvedValue(airshipMock);
-        // mockFlightRepository.getLastFlightByAirship.mockResolvedValue(null)
         mockAviatorRepository.findById.mockResolvedValue(aviatorMock)
         const findPlanet = mockPlanetRepository.getByName.mockResolvedValue(null)
         await expect(saveFlight.execute(flightData)).rejects.toThrow(PlanetNotFoundError)

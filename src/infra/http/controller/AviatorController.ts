@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import FindAviatorByFlyCardNumber from '../../../application/service/FindAviatorByFlyCardNumber';
 import SaveAviator from "../../../application/service/SaveAviator";
-
+import { validationResult } from "express-validator";
 export default class AviatorController {
     constructor(
         readonly saveAviator: SaveAviator,
@@ -9,6 +9,12 @@ export default class AviatorController {
     ) { }
 
     async save(req: Request, res: Response): Promise<void> {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          res.status(400).json({ errors: errors.array() });
+          return;
+        }
+
         try {
             const { name, flyCardNumber, currentPlanet } = req.body;
 

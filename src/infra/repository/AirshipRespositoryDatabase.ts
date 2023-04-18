@@ -70,8 +70,5 @@ export default class AirshipRespositoryDatabase implements AirshipRespository {
         }
 
         return airships
-
     }
-
-
 }

@@ -33,7 +33,7 @@ describe("FindAviatorByFlyCardNumber", () => {
         );
     });
 
-    it("should return the aviator with the given fly card number", async () => {
+    it("Deve retornar o piloto", async () => {
         const aviator = new Aviator(1, 'luiz', 2, 1, 'planeta')
         mockedAviatorRepository.findByFlyCardNumber.mockResolvedValueOnce(aviator);
 

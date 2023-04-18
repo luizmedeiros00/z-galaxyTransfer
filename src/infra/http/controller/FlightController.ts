@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import GetFlightByFlyCardNumber from '../../../application/service/GetFlightByFlyCardNumber';
 import SaveFlight from "../../../application/service/SaveFlight";
+import { body, validationResult } from 'express-validator';
 
 export default class FlightController {
     constructor(
@@ -10,7 +11,14 @@ export default class FlightController {
     }
 
     async save(req: Request, res: Response): Promise<void> {
+
         try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+              res.status(400).json({ errors: errors.array() });
+              return;
+            }
+      
             const {
                 startAt,
                 arrivalAt,
